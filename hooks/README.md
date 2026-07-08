@@ -93,34 +93,6 @@ timeout_seconds = 10
 
 4. 重启 ElBot 或等待自动 reload。
 
-## 各语言特性展示
-
-### C — what-to-eat
-
-- 手动内存操作（`char[][]` 固定大小数组）
-- `stdio` 流读写（`fgets`/`fopen`/`printf`）
-- 手写 JSON escape 函数
-- `time.h` + `srand`/`rand` 随机数
-- 零外部依赖，编译产物体积极小
-
-### C++ — dice-roller
-
-- `<random>` 梅森旋转引擎（`std::mt19937`）+ `std::uniform_int_distribution`
-- `<chrono>` 高精度时钟作为随机种子
-- `<regex>` 正则解析 NdM 语法
-- `class`/`struct` 封装掷骰逻辑
-- `std::vector` + 范围 for 循环
-- `std::ostringstream` 流式拼接输出
-
-### TypeScript — fortune-stick
-
-- `enum` / `interface` 类型系统
-- `async`/`await` + `readline` 异步读 stdin
-- 模板字符串拼接签文
-- `Promise` 封装 readline 读取
-- 数据驱动的签文数组设计
-
----
 
 # Hook Plugins Showcase (English)
 
@@ -217,29 +189,3 @@ timeout_seconds = 10
 
 4. Restart ElBot or wait for auto reload.
 
-## Language Feature Highlights
-
-### C — what-to-eat
-
-- Manual memory management (`char[][]` fixed-size arrays)
-- `stdio` stream I/O (`fgets`/`fopen`/`printf`)
-- Hand-written JSON escape function
-- `time.h` + `srand`/`rand` for randomness
-- Zero external dependencies, minimal binary size
-
-### C++ — dice-roller
-
-- `<random>` Mersenne Twister engine (`std::mt19937`) + `std::uniform_int_distribution`
-- `<chrono>` high-resolution clock as random seed
-- `<regex>` for parsing NdM notation
-- `class`/`struct` encapsulation
-- `std::vector` + range-based for loops
-- `std::ostringstream` for stream formatting
-
-### TypeScript — fortune-stick
-
-- `enum` / `interface` type system
-- `async`/`await` with `readline` for async stdin reading
-- Template literals for string interpolation
-- `Promise` wrapper for readline
-- Data-driven fortune array design

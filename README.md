@@ -8,6 +8,7 @@
 |----------|------|
 | [elwisp](elwisp/) | 外部事件监听——一条 curl 把任何外部信号接入 ElBot |
 | [frontend](frontend/) | 前端能力展示——前后端分离，agent 可自由构建界面 |
+| [hooks](hooks/) | Hook 插件示例——C / C++ / TypeScript 三语言展示 exec 脚本扩展 |
 
 更多 showcase 持续添加中。
 
@@ -35,6 +36,7 @@ A collection of showcases for the [ElBot](https://github.com/Elflare/elbot) ecos
 |----------|-------------|
 | [elwisp](elwisp/) | External event listener — one curl to feed any signal into ElBot |
 | [frontend](frontend/) | Frontend capabilities — front-back separation, agent-built UI |
+| [hooks](hooks/) | Hook plugin examples — C / C++ / TypeScript demonstrating exec script extensibility |
 
 More showcases coming soon.
 

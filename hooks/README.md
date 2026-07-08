@@ -91,7 +91,7 @@ command = "ts-node ./fortune-stick/fortune_stick.ts"
 timeout_seconds = 10
 ```
 
-4. 重启 ElBot 或等待自动 reload。
+4. 重启 ElBot 或者使用 `/hooks reload` 重载。
 
 
 # Hook Plugins Showcase (English)
@@ -187,5 +187,5 @@ command = "ts-node ./fortune-stick/fortune_stick.ts"
 timeout_seconds = 10
 ```
 
-4. Restart ElBot or wait for auto reload.
+4. Restart ElBot or run `/hooks reload`.
 

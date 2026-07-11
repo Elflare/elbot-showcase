@@ -1,50 +1,50 @@
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <random>
+#include <algorithm>
 #include <chrono>
-#include <vector>
+#include <iostream>
+#include <random>
 #include <regex>
+#include <sstream>
+#include <string>
+#include <vector>
 
-// Extract a string field value from JSON (simple scan, no external lib)
-std::string extract_json_string(const std::string& json, const std::string& field) {
-    std::string needle = "\"" + field + ":\"";
+std::string json_string(const std::string& json, const std::string& field) {
+    const std::string needle = "\"" + field + "\"";
     auto pos = json.find(needle);
     if (pos == std::string::npos) return "";
-    pos += needle.size();
+    pos = json.find(':', pos + needle.size());
+    if (pos == std::string::npos) return "";
+    pos = json.find('"', pos + 1);
+    if (pos == std::string::npos) return "";
+
     std::string result;
-    while (pos < json.size() && json[pos] != '"') {
-        if (json[pos] == '\\' && pos + 1 < json.size()) {
-            pos++;
+    for (++pos; pos < json.size() && json[pos] != '"'; ++pos) {
+        if (json[pos] == '\\' && ++pos < json.size()) {
             switch (json[pos]) {
-                case 'n':  result += '\n'; break;
-                case 'r':  result += '\r'; break;
-                case 't':  result += '\t'; break;
-                case '"':  result += '"';  break;
-                case '\\': result += '\\'; break;
-                default:   result += json[pos]; break;
+                case 'n': result += '\n'; break;
+                case 'r': result += '\r'; break;
+                case 't': result += '\t'; break;
+                default: result += json[pos];
             }
         } else {
             result += json[pos];
         }
-        pos++;
     }
     return result;
 }
 
-std::string json_escape(const std::string& s) {
-    std::string out;
-    for (char c : s) {
+std::string json_escape(const std::string& text) {
+    std::string escaped;
+    for (char c : text) {
         switch (c) {
-            case '"':  out += "\\\""; break;
-            case '\\': out += "\\\\"; break;
-            case '\n': out += "\\n";  break;
-            case '\r': out += "\\r";  break;
-            case '\t': out += "\\t";  break;
-            default:   out += c;      break;
+            case '"': escaped += "\\\""; break;
+            case '\\': escaped += "\\\\"; break;
+            case '\n': escaped += "\\n"; break;
+            case '\r': escaped += "\\r"; break;
+            case '\t': escaped += "\\t"; break;
+            default: escaped += c;
         }
     }
-    return out;
+    return escaped;
 }
 
 struct DiceSpec {
@@ -52,62 +52,60 @@ struct DiceSpec {
     int sides;
 };
 
-// Parse NdM notation from user text (e.g. "3d6", "2d20")
-// Falls back to 1d6 for keywords like 掷骰子 / 摇骰子
 DiceSpec parse_dice(const std::string& text) {
     std::regex dice_re(R"((\d+)?d(\d+))", std::regex::icase);
-    std::smatch m;
-    if (std::regex_search(text, m, dice_re)) {
-        int count = m[1].str().empty() ? 1 : std::stoi(m[1].str());
-        int sides = std::stoi(m[2].str());
-        count = std::clamp(count, 1, 100);
-        sides = std::clamp(sides, 2, 1000);
-        return {count, sides};
-    }
-    return {1, 6};
+    std::smatch match;
+    if (!std::regex_search(text, match, dice_re)) return {1, 6};
+    const int count = std::clamp(match[1].str().empty() ? 1 : std::stoi(match[1].str()), 1, 100);
+    const int sides = std::clamp(std::stoi(match[2].str()), 2, 1000);
+    return {count, sides};
 }
 
-class DiceRoller {
-    std::mt19937 rng_;
-public:
-    DiceRoller() : rng_(std::chrono::high_resolution_clock::now().time_since_epoch().count()) {}
-
-    std::vector<int> roll(int count, int sides) {
-        std::uniform_int_distribution<int> dist(1, sides);
-        std::vector<int> results;
-        results.reserve(count);
-        for (int i = 0; i < count; ++i)
-            results.push_back(dist(rng_));
-        return results;
-    }
-
-    static int sum(const std::vector<int>& rolls) {
-        int total = 0;
-        for (int v : rolls) total += v;
-        return total;
-    }
-};
-
 int main() {
-    // hook.v1: read only the first line (init frame)
     std::string line;
-    if (!std::getline(std::cin, line)) return 0;
+    while (std::getline(std::cin, line)) {
+        const std::string id = json_string(line, "id");
+        const std::string method = json_string(line, "method");
 
-    DiceSpec spec = parse_dice(line);
+        if (method == "system.init") {
+            std::cout << "{\"type\":\"response\",\"id\":\"" << json_escape(id)
+                      << "\",\"ok\":true,\"result\":{}}" << std::endl;
+            continue;
+        }
+        if (method == "system.shutdown") {
+            std::cout << "{\"type\":\"response\",\"id\":\"" << json_escape(id)
+                      << "\",\"ok\":true,\"result\":{}}" << std::endl;
+            return 0;
+        }
+        if (method != "event.handle") {
+            std::cout << "{\"type\":\"response\",\"id\":\"" << json_escape(id)
+                      << "\",\"ok\":false,\"error\":\"unsupported method\"}" << std::endl;
+            return 0;
+        }
 
-    DiceRoller roller;
-    auto rolls = roller.roll(spec.count, spec.sides);
-    int total = DiceRoller::sum(rolls);
+        const DiceSpec spec = parse_dice(json_string(line, "intent_text"));
+        std::mt19937 rng(std::random_device{}());
+        std::uniform_int_distribution<int> roll(1, spec.sides);
+        std::vector<int> results;
+        int total = 0;
+        for (int i = 0; i < spec.count; ++i) {
+            const int value = roll(rng);
+            results.push_back(value);
+            total += value;
+        }
 
-    std::ostringstream oss;
-    oss << spec.count << "d" << spec.sides << ": ";
-    for (size_t i = 0; i < rolls.size(); ++i) {
-        if (i > 0) oss << " + ";
-        oss << rolls[i];
+        std::ostringstream text;
+        text << spec.count << "d" << spec.sides << ": ";
+        for (size_t i = 0; i < results.size(); ++i) {
+            if (i > 0) text << " + ";
+            text << results[i];
+        }
+        text << " = " << total;
+
+        std::cout << "{\"type\":\"response\",\"id\":\"" << json_escape(id)
+                  << "\",\"ok\":true,\"result\":{\"status\":\"completed\",\"outputs\":[{\"kind\":\"text\",\"text\":\""
+                  << json_escape(text.str()) << "\"}]}}" << std::endl;
+        return 0;
     }
-    oss << " = " << total;
-
-    std::cout << "{\"type\":\"output\",\"outputs\":[{\"kind\":\"text\",\"text\":\""
-              << json_escape(oss.str()) << "\"}]}" << std::endl;
-    std::cout << "{\"type\":\"done\",\"result\":\"ok\"}" << std::endl;
+    return 0;
 }

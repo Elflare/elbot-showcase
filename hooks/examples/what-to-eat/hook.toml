@@ -1,0 +1,16 @@
+[[rules]]
+name = "what_to_eat"
+description = "随机选择一道菜"
+on = "platform.message.received"
+priority = 100
+require_wakeup = false
+consume = true
+if = "message.intent_text"
+op = "fullmatch"
+value = "吃什么"
+
+[[rules.actions]]
+type = "exec"
+command = "./what_to_eat"
+cwd = "."
+timeout_seconds = 5

@@ -1,0 +1,30 @@
+[plugin]
+name = "weather-demo"
+description = "只支持上海的有状态天气助手"
+blocked_platform = []
+blocked_group = []
+blocked_id = []
+
+[plugin.runtime]
+stateful = true
+command = "uv run weather_hook.py"
+cwd = "."
+startup_timeout_seconds = 10
+shutdown_timeout_seconds = 5
+event_timeout_seconds = 30
+max_wait_seconds = 300
+
+[plugin.runtime.restart]
+strategy = "on_failure"
+initial_delay_seconds = 1
+max_delay_seconds = 10
+
+[[rules]]
+name = "weather_demo_query"
+description = "查询上海天气"
+on = "platform.message.received"
+priority = 100
+require_wakeup = false
+if = "message.intent_text"
+op = "startswith"
+value = "查询天气"

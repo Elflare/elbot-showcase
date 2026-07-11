@@ -1,0 +1,16 @@
+[[rules]]
+name = "fortune_stick"
+description = "随机抽取一支签"
+on = "platform.message.received"
+priority = 100
+require_wakeup = false
+consume = true
+if = "message.intent_text"
+op = "fullmatch"
+value = "求签"
+
+[[rules.actions]]
+type = "exec"
+command = "ts-node fortune_stick.ts"
+cwd = "."
+timeout_seconds = 10

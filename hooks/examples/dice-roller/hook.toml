@@ -1,0 +1,16 @@
+[[rules]]
+name = "dice_roller"
+description = "掷骰子，支持 NdM 语法"
+on = "platform.message.received"
+priority = 100
+require_wakeup = false
+consume = true
+if = "message.intent_text"
+op = "regex"
+value = "^(\\d+)?d(\\d+)$|掷骰子|摇骰子|掷个骰子|摇个骰子"
+
+[[rules.actions]]
+type = "exec"
+command = "./dice_roller"
+cwd = "."
+timeout_seconds = 5

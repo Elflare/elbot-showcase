@@ -20,7 +20,7 @@ def waiting(prompt):
         "conversation_id": "weather-" + uuid.uuid4().hex,
         "expires_at": expires.isoformat().replace("+00:00", "Z"),
         "outputs": [output(prompt)],
-        "consume": True,
+        "pass_through": False,
     }
 
 
@@ -28,7 +28,7 @@ def completed(text):
     return {
         "status": "completed",
         "outputs": [output(text)],
-        "consume": True,
+        "pass_through": False,
     }
 
 

@@ -6,7 +6,7 @@ blocked_group = []
 blocked_id = []
 
 [plugin.runtime]
-stateful = true
+mode = "persistent"
 command = "uv run weather_hook.py"
 cwd = "."
 startup_timeout_seconds = 10

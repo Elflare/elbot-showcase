@@ -59,7 +59,7 @@ ts-node fortune_stick.ts
 system.init -> event.handle
 ```
 
-脚本对每个 request 在 stdout 写出一行 JSON response；日志只写 stderr。`event.handle` 的 result 使用 `status`、`outputs`、`pass_through` 等 `hook.v2` 字段；`pass_through = false` 接管消息，`true` 则放行。完成响应后，一次性脚本退出。
+脚本对每个 request 在 stdout 写出一行 JSON response；日志只写 stderr。`event.handle` 的 result 使用 `status`、`outputs`、`consume`、`stop_propagation` 等 `hook.v2` 字段；本示例通过规则中的 `consume = true` 接管匹配消息。完成响应后，一次性脚本退出。
 
 ### 持久天气插件
 
@@ -149,7 +149,7 @@ For every matching event, ElBot starts a one-shot plugin and sends requests in t
 system.init -> event.handle
 ```
 
-The script writes one JSON response per request to stdout and logs only to stderr. The `event.handle` result uses `hook.v2` fields such as `status`, `outputs`, and `pass_through`; `pass_through = false` handles the message, while `true` lets it continue. A one-shot plugin exits after its completed response.
+The script writes one JSON response per request to stdout and logs only to stderr. The `event.handle` result uses `hook.v2` fields such as `status`, `outputs`, `consume`, and `stop_propagation`; these examples handle matching messages through `consume = true` in their rules. A one-shot plugin exits after its completed response.
 
 ### Stateful Weather Plugin
 

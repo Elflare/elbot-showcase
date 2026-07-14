@@ -11,6 +11,6 @@ value = "吃什么"
 
 [[rules.actions]]
 type = "exec"
-command = "./what_to_eat"
+command = ["./what_to_eat"]
 cwd = "."
 timeout_seconds = 5

@@ -11,6 +11,6 @@ value = "求签"
 
 [[rules.actions]]
 type = "exec"
-command = "ts-node fortune_stick.ts"
+command = ["ts-node", "fortune_stick.ts"]
 cwd = "."
 timeout_seconds = 10

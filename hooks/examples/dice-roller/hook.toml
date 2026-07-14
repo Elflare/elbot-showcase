@@ -11,6 +11,6 @@ value = "^(\\d+)?d(\\d+)$|掷骰子|摇骰子|掷个骰子|摇个骰子"
 
 [[rules.actions]]
 type = "exec"
-command = "./dice_roller"
+command = ["./dice_roller"]
 cwd = "."
 timeout_seconds = 5

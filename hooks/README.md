@@ -53,6 +53,8 @@ ts-node fortune_stick.ts
 
 `hook.toml` 中的 `cwd = "."` 使命令在插件目录中执行，因此 C 示例可直接读取同目录的 `dishes.txt`。
 
+`command` 必须是 argv 数组，例如 `command = ["ts-node", "fortune_stick.ts"]`；每个元素原样传递，不经过 shell。
+
 每次规则命中时，ElBot 会启动一次性插件并依次请求：
 
 ```text
@@ -142,6 +144,8 @@ ts-node fortune_stick.ts
 ```
 
 `cwd = "."` in each `hook.toml` runs the command in its plugin directory, so the C example can read its colocated `dishes.txt` directly.
+
+`command` must be an argv array, for example `command = ["ts-node", "fortune_stick.ts"]`. Each element is passed unchanged without a shell.
 
 For every matching event, ElBot starts a one-shot plugin and sends requests in this order:
 

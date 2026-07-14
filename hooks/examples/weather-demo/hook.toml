@@ -7,7 +7,7 @@ blocked_id = []
 
 [plugin.runtime]
 mode = "persistent"
-command = "uv run weather_hook.py"
+command = ["uv", "run", "weather_hook.py"]
 cwd = "."
 startup_timeout_seconds = 10
 shutdown_timeout_seconds = 5

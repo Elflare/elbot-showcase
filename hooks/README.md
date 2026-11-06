@@ -61,11 +61,13 @@ ts-node fortune_stick.ts
 system.init -> event.handle
 ```
 
-脚本对每个 request 在 stdout 写出一行 JSON response；日志只写 stderr。`event.handle` 的 result 使用 `status`、`outputs`、`consume`、`stop_propagation` 等 `hook.v2` 字段；本示例通过规则中的 `consume = true` 接管匹配消息。完成响应后，一次性脚本退出。
+脚本对每个 request 在 stdout 写出一行 JSON response，response 必须复用 request 的 `id`；日志只写 stderr。`event.handle` 的 result 使用 `status`、`outputs` 等 `hook.v2` 字段。进程可通过 `pass_through = false` 接管消息、`true` 放行，覆盖规则默认的控制字段；省略时沿用规则配置。本目录的一次性示例通过 TOML 规则中的 `consume = true` 接管匹配消息，该配置仍然有效。完成响应后，一次性脚本退出。
 
 ### 持久天气插件
 
-`weather-demo` 使用 `uv run weather_hook.py` 启动常驻进程。它不调用 Host 工具，只演示 waiting 会话与后续输入路由。
+`weather-demo` 使用 `uv run weather_hook.py` 启动常驻进程。它不调用 Host 工具，只演示 waiting 会话与后续输入路由，通过响应中的 `pass_through = false` 接管消息。
+
+`[plugin]` 中的 `blocked_group`、`blocked_id` 是按平台分组的表，不是数组；不限制时可省略或使用 `{}`。例如，限制指定 QQ OneBot 群或用户时写作 `blocked_group.qqonebot = ["123456"]`、`blocked_id.qqonebot = ["10001"]`。
 
 全局 `/hooks reload` 后，可以依次测试：
 
@@ -86,7 +88,7 @@ system.init -> event.handle
 -> 在 waiting 期间取消当前 Hook 会话。
 ```
 
-持久 Hook 先响应 `system.init`，随后持续处理 `event.handle`。在 waiting 期间，同一 platform、scope 和用户的后续消息会以 `continuation = true` 交给同一进程；Host 的 `/cancel` 会以 `event.cancel` 通知进程，不需要 response。
+持久 Hook 先响应 `system.init`，随后持续处理 `event.handle`。事件的聊天信息位于 `event.chat`（`platform`、`chat_type`、`id`），用户身份位于 `event.actor`（`platform`、`id`）。在 waiting 期间，同一聊天和用户的后续消息会以 `continuation = true` 交给同一进程；waiting 响应必须包含非空 `conversation_id` 和 RFC 3339 格式的 `expires_at`，后者不得超过 `max_wait_seconds`。Host 的 `/cancel` 会以 `event.cancel` 通知进程，不需要 response；关闭时进程响应 `system.shutdown` 后退出。
 
 ---
 
@@ -153,11 +155,13 @@ For every matching event, ElBot starts a one-shot plugin and sends requests in t
 system.init -> event.handle
 ```
 
-The script writes one JSON response per request to stdout and logs only to stderr. The `event.handle` result uses `hook.v2` fields such as `status`, `outputs`, `consume`, and `stop_propagation`; these examples handle matching messages through `consume = true` in their rules. A one-shot plugin exits after its completed response.
+The script writes one JSON response per request to stdout, reusing the request's `id`, and logs only to stderr. The `event.handle` result uses `hook.v2` fields such as `status` and `outputs`. A process can set `pass_through` to `false` to take over or `true` to pass through, overriding the rule's default control fields; omitting it preserves the rule configuration. The one-shot examples use `consume = true` in their TOML rules to handle matching messages, which remains valid. A one-shot plugin exits after its completed response.
 
 ### Stateful Weather Plugin
 
-`weather-demo` starts a persistent process with `uv run weather_hook.py`. It makes no Host tool calls and demonstrates waiting sessions and continuation routing.
+`weather-demo` starts a persistent process with `uv run weather_hook.py`. It makes no Host tool calls and demonstrates waiting sessions and continuation routing, taking over messages with `pass_through = false` in its responses.
+
+The `[plugin]` fields `blocked_group` and `blocked_id` are platform-keyed tables, not arrays; omit them or use `{}` when no restrictions are needed. For example, block a QQ OneBot group or user with `blocked_group.qqonebot = ["123456"]` or `blocked_id.qqonebot = ["10001"]`.
 
 After a global `/hooks reload`, test it in this order:
 
@@ -178,4 +182,4 @@ After a global `/hooks reload`, test it in this order:
 -> Cancels the active Hook session while waiting.
 ```
 
-A stateful Hook responds to `system.init` and then continuously handles `event.handle`. While waiting, a later message from the same platform, scope, and user is delivered to the same process with `continuation = true`; the Host sends `/cancel` as an `event.cancel` notification, which needs no response.
+A stateful Hook responds to `system.init` and then continuously handles `event.handle`. Chat information is in `event.chat` (`platform`, `chat_type`, `id`), and user identity is in `event.actor` (`platform`, `id`). While waiting, a later message from the same chat and user is delivered to the same process with `continuation = true`. A waiting response must include a nonempty `conversation_id` and an RFC 3339 `expires_at` within `max_wait_seconds`. The Host sends `/cancel` as an `event.cancel` notification, which needs no response; on shutdown, the process responds to `system.shutdown` and exits.

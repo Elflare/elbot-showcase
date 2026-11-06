@@ -2,8 +2,8 @@
 name = "weather-demo"
 description = "只支持上海的有状态天气助手"
 blocked_platform = []
-blocked_group = []
-blocked_id = []
+blocked_group = {}
+blocked_id = {}
 
 [plugin.runtime]
 mode = "persistent"
